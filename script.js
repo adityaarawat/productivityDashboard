@@ -457,13 +457,24 @@ let weatherApiKey = "456b683fa5ca457ab7c62509250911";
 let data = null;
 
 // Function to get weather data using coordinates
-async function weatherApiCall(lat, lon) {
+async function weatherApiCall(query) {
   try {
-    let response = await fetch(`http://api.weatherapi.com/v1/current.json?key=${weatherApiKey}&q=${lat},${lon}`);
+    let response = await fetch(`https://api.weatherapi.com/v1/current.json?key=${weatherApiKey}&q=${query}`);
     data = await response.json();
+    updateWeatherDOM(); // Update DOM after data is fetched
   } catch (error) {
     console.error("Weather API error:", error);
   }
+}
+
+// Update weather DOM
+function updateWeatherDOM() {
+  if (!data) return;
+  preciption.innerHTML = `Heat Index: ${data.current.heatindex_c} °C`;
+  humidity.innerHTML = `Humidity: ${data.current.humidity}%`;
+  wind.innerHTML = `Wind: ${data.current.wind_kph} Km/h`;
+  temp.innerHTML = `${data.current.temp_c} °C`;
+  condition.innerHTML = `${data.current.condition.text}`;
 }
 
 // Function to get user's location
@@ -473,11 +484,10 @@ function getLocationAndWeather() {
       (position) => {
         let lat = position.coords.latitude;
         let lon = position.coords.longitude;
-        weatherApiCall(lat, lon);
+        weatherApiCall(`${lat},${lon}`);
       },
       (error) => {
         console.warn("Geolocation failed, defaulting to Meerut");
-        // fallback if user denies geolocation
         weatherApiCall("Meerut");
       }
     );
@@ -505,26 +515,13 @@ function timeDate() {
   let month = date.getMonth();
   let year = date.getFullYear();
 
-  // Only update weather info if data is available
-  if (data) {
-    preciption.innerHTML = `Heat Index: ${data.current.heatindex_c} °C`;
-    humidity.innerHTML = `Humidity: ${data.current.humidity}%`;
-    wind.innerHTML = `Wind: ${data.current.wind_kph} Km/h`;
-    temp.innerHTML = `${data.current.temp_c} °C`;
-    condition.innerHTML = `${data.current.condition.text}`;
-  }
-
   header1Date.innerHTML = `${todayDate} ${months[month]}, ${year}`;
-
-  if (hours > 12) {
-    header1Data.innerHTML = `${dayOfWeek}, ${String(hours - 12).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")} PM`;
-  } else {
-    header1Data.innerHTML = `${dayOfWeek}, ${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")} AM`;
-  }
+  header1Data.innerHTML = `${dayOfWeek}, ${String(hours % 12 || 12).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")} ${hours >= 12 ? 'PM' : 'AM'}`;
 }
 
 // Update every second
 setInterval(timeDate, 1000);
+
 
 
 }
