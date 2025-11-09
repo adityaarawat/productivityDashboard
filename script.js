@@ -445,66 +445,87 @@ productivityTracker();
 
 // Weather Podcast Script 777777777777777777777777777777777777777777777777777777777777
 function weatherPodcast(){
-  let header1Data=document.querySelector(".header-1 h1");
-let header1Date=document.querySelector(".header-1 .h2");
-let weatherApiKey="456b683fa5ca457ab7c62509250911";
-let temp=document.querySelector(".header-2 .temp");
-let condition=document.querySelector(".header-2 .condition");
-let preciption=document.querySelector(".header-2 .preciption");
-let humidity=document.querySelector(".header-2 .humidity");
-let wind=document.querySelector(".header-2 .wind");
+let header1Data = document.querySelector(".header-1 h1");
+let header1Date = document.querySelector(".header-1 .h2");
+let temp = document.querySelector(".header-2 .temp");
+let condition = document.querySelector(".header-2 .condition");
+let preciption = document.querySelector(".header-2 .preciption");
+let humidity = document.querySelector(".header-2 .humidity");
+let wind = document.querySelector(".header-2 .wind");
 
-    
-let city="Meerut";
-let data=null;
-async function weatherApiCall(){
-  let response=await fetch(`http://api.weatherapi.com/v1/current.json?key=${weatherApiKey}&q=${city}`);
-  data =await response.json();;
+let weatherApiKey = "456b683fa5ca457ab7c62509250911";
+let data = null;
+
+// Function to get weather data using coordinates
+async function weatherApiCall(lat, lon) {
+  try {
+    let response = await fetch(`http://api.weatherapi.com/v1/current.json?key=${weatherApiKey}&q=${lat},${lon}`);
+    data = await response.json();
+  } catch (error) {
+    console.error("Weather API error:", error);
+  }
 }
 
-weatherApiCall();
+// Function to get user's location
+function getLocationAndWeather() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        let lat = position.coords.latitude;
+        let lon = position.coords.longitude;
+        weatherApiCall(lat, lon);
+      },
+      (error) => {
+        console.warn("Geolocation failed, defaulting to Meerut");
+        // fallback if user denies geolocation
+        weatherApiCall("Meerut");
+      }
+    );
+  } else {
+    console.warn("Geolocation not supported, defaulting to Meerut");
+    weatherApiCall("Meerut");
+  }
+}
 
-function timeDate(){
+getLocationAndWeather();
+
+function timeDate() {
   const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December"
-];
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
   const week = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  let date=new Date();
-  let dayOfWeek=week[date.getDay()];
-  let hours=date.getHours();
-  let minutes=date.getMinutes();
-  let seconds=date.getSeconds();
-  let todayDate=date.getDate();
-  let month=date.getMonth();
-  let year=date.getFullYear();
-  preciption.innerHTML=`Heat Index: ${data.current.heatindex_c}%`;
-  humidity.innerHTML=`Humidity: ${data.current.humidity}%`;
-  wind.innerHTML=` Wind: ${data.current.wind_kph} Km/h`;
-  temp.innerHTML=`${data.current.temp_c} °c`;
 
-  condition.innerHTML=`${data.current.condition.text}`;
-  header1Date.innerHTML=`${todayDate} ${months[month]}, ${year}`;
-  if(hours>12){
-    header1Data.innerHTML=`${dayOfWeek}, ${String(hours-12).padStart("2","0")}:${String(minutes).padStart("2","0")}:${String(seconds).padStart("2","0")} PM`;
+  let date = new Date();
+  let dayOfWeek = week[date.getDay()];
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  let seconds = date.getSeconds();
+  let todayDate = date.getDate();
+  let month = date.getMonth();
+  let year = date.getFullYear();
+
+  // Only update weather info if data is available
+  if (data) {
+    preciption.innerHTML = `Heat Index: ${data.current.heatindex_c} °C`;
+    humidity.innerHTML = `Humidity: ${data.current.humidity}%`;
+    wind.innerHTML = `Wind: ${data.current.wind_kph} Km/h`;
+    temp.innerHTML = `${data.current.temp_c} °C`;
+    condition.innerHTML = `${data.current.condition.text}`;
   }
-  else{
-      header1Data.innerHTML=`${dayOfWeek}, ${String(hours).padStart("2","0")}:${String(minutes).padStart("2","0")}:${String(seconds).padStart("2","0")} AM`;
+
+  header1Date.innerHTML = `${todayDate} ${months[month]}, ${year}`;
+
+  if (hours > 12) {
+    header1Data.innerHTML = `${dayOfWeek}, ${String(hours - 12).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")} PM`;
+  } else {
+    header1Data.innerHTML = `${dayOfWeek}, ${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")} AM`;
   }
 }
-setInterval(()=>{
-timeDate();
-},1)
+
+// Update every second
+setInterval(timeDate, 1000);
+
 
 }
 
