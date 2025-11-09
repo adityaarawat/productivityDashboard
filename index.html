@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Productivity Dashboard</title>
+    <link rel="shortcut icon" href="images/icons.png" type="image/x-icon">
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="main">
+      <nav>
+        <h1>Productivity Dashboard</h1>
+        <div class="Connect">
+          <a href="contact.html">Connect With Me</a>
+        </div>
+        </nav>
+      <section class="allElements">
+          <header>
+           <div class="header-1">
+            <h2 class="h2"></h2>
+           <h1>Saturday, 1:00 pm</h1>
+           <h2>Meerut</h2>
+           </div>
+           <div class="header-2">
+             <h2 class="temp"></h2>
+               <h4 class="condition"  ></h4>
+            <h3 class="preciption"></h3>
+           
+            <h3 class="humidity"></h3>
+            <h3 class="wind"></h3>
+            
+            
+            
+           </div>
+            </header>
+        <div class="allFeatures">
+          <div class="todo elems" id="0">
+          <img src="images/TodoImage.png" alt="Todo Image" />
+          
+        </div>
+        <div class="daily elems" id="1">
+          <img src="images/DailyPlanner.png" alt="Daily Planner Image" />
+         
+        </div>
+        <div class="motivation elems" id="2">
+          <img src="images/Motivational.png" alt="Motivation Image" />
+      
+        </div>
+        <div class="Pomodoro elems" id="3">
+          <img src="images/pomodoro.png" alt="Pomodoro Timer Image" />
+         
+        </div>
+        <div class="DailyGoals elems" id="4">
+          <img src="images/Daily Goals.png" alt="Daily Goals Image" />
+        </div>
+        <div class="PTracker elems" id="5">
+          <img src="images/pTracker.png" alt="Productivity Tracker" />
+        </div>
+        </div>
+      </section>
+
+      <section class="fullElem todoListFullPage">
+        <button class="back" id="0">Close</button>
+        <h1>Designed for You. Driven by Your To-Dos.</h1>
+        <div class="todoContainer">
+          <div class="addTodos">
+            <form >
+              <input id="userValue" type="text" placeholder="Enter Task">
+              <textarea name="" id="" cols="20" rows="10" placeholder="Enter Details"></textarea>
+               <div class="markImportant">
+                <input type="checkbox" name="" id="checkbox">
+                <label for="checkbox">Mark as Important</label>
+              </div>
+              <button>Add Task</button>
+            </form>
+          </div>
+          <div class="allTodos">
+          </div>
+        </div>
+      </section>
+      <section class="fullElem dailyPlannerFullPage">
+       <button class="back" id="1">Close</button>
+        <h1>Organize Your Day, Achieve More.</h1>
+        <div class="dayPlanner">
+        </div>
+      </section>
+      <section class="fullElem motivationalFullPage">
+        <button class="back" id="2">Close</button>
+        <h1>Motivational Quotes</h1>
+        <div class="motivationContainer">
+          <div class="motivationWrapper">
+            <img src="images/quotes.png" alt="Quotes Image">
+            <div class="motivation-1">
+              <h2>Motivation of the Day</h2>
+            </div>
+            <div class="motivation-2">
+              <p>
+                 
+             
+            </div>
+            <div class="motivation-3">
+             <h2></h2>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="fullElem pomodoroTimerFullPage">
+        <button class="back" id="3">Close</button>
+        <h1>Focus. Achieve. Repeat.</h1>
+        <h4 class="session">Work Session</h4>
+        <div class="pomodoroTimer">
+          <h2 class="h2">25:00</h2>
+          
+          <button class="startTimer">
+            Start
+          </button>
+          <button class="pauseTimer">
+            Pause
+          </button>
+          <button class="resetTimer">
+            Reset
+          </button>
+        </div>
+      </section>
+      <section class="fullElem NotesFullPage">
+        <button class="back" id="4">Close</button>
+        <h2>Note App</h2>
+        
+        <button class="AddNote">Add Note</button>
+        <div class="AllNotes">   
+        </div>
+       
+      </section>
+      <section class="fullElem ProductivityTracker">
+        <button class="back" id="5">Close</button>
+        
+        <div class="containerProductivity">
+            <h1>FlowTime Dashboard</h1>
+        <div class="pTrackerContainer">
+          <h1>📊 Personal Productivity Tracker</h1>
+          <form id="dataForm">
+            <input type="text" id="task" placeholder="Enter Task" required>
+            <input type="number" id="hours" placeholder="Hours Spent" required>
+            <button type="submit"> Add Task</button>
+          </form>
+          <canvas id="myChart"></canvas>
+        </div>
+        </div>
+       
+      </section>
+    </div>
+    <footer class="footer">
+  <div class="footer-content">
+    <p>&copy; 2025 Aditya Rawat. All Rights Reserved.</p>
+    <p>Designed for your productivity dashboard</p>
+  </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

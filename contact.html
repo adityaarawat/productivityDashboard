@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Productivity Dashboard</title>
+    <link rel="shortcut icon" href="images/icons.png" type="image/x-icon">
+  <link rel="stylesheet" href="contactForm.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">Contact</div>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="contact-wrap">
+      <h2>Get in touch</h2>
+      <p class="small-muted">Have feedback or want a new feature? Send a message and I'll reply.</p>
+
+      <form id="contactForm" novalidate>
+        <div class="form-row">
+          <div class="field">
+            <label for="name">Name</label>
+            <input id="name" name="name" type="text" required placeholder="Your name" />
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required placeholder="you@example.com" />
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:12px;">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" rows="6" required placeholder="How can I help?"></textarea>
+        </div>
+
+        <div style="margin-top:12px;display:flex;align-items:center;gap:12px;">
+          <button type="submit" class="btn">Send message</button>
+          <div id="formStatus" aria-live="polite"></div>
+        </div>
+      </form>
+
+      <div style="margin-top:12px" class="small-muted">
+        Or email me directly at
+        <a href="mailto:aditya@example.com">aditya@example.com</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>© <span id="year3"></span> Aditya Rawat</div>
+    <div class="links"><a href="#">Help</a></div>
+  </footer>
+
+  <script>
+    // populate year
+    document.getElementById('year3').textContent = new Date().getFullYear();
+
+    // contact form handling — client-side validation + mailto fallback
+    (function(){
+      const form = document.getElementById('contactForm');
+      const status = document.getElementById('formStatus');
+
+      function showStatus(msg, ok){
+        status.innerHTML = `<div class="${ok? 'success' : 'small-muted'}">${msg}</div>`;
+      }
+
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        const name = form.name.value.trim();
+        const email = form.email.value.trim();
+        const message = form.message.value.trim();
+
+        if(!name || !email || !message){
+          showStatus('Please fill all required fields.', false);
+          return;
+        }
+
+        if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
+          showStatus('Please enter a valid email address.', false);
+          return;
+        }
+
+        // success UI
+        showStatus('Thanks — your message is ready to send. Opening email client as a fallback...', true);
+
+        // fallback: open user's mail client with prefilled content (they can send manually)
+        const subject = encodeURIComponent('Contact from Productivity Dashboard — ' + name);
+        const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`);
+        setTimeout(()=>{
+          window.location.href = `mailto:aditya@example.com?subject=${subject}&body=${body}`;
+        }, 800);
+
+        // clear form shortly after
+        setTimeout(()=>{ form.reset(); }, 1200);
+      });
+    })();
+  </script>
+</body>
+</html>
