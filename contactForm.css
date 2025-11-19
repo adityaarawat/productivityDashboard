@@ -139,7 +139,9 @@ a:hover {
     display: flex;
   }
 }
-
+.Home{
+  border-bottom: 2px solid #ffffff;
+}
 /* =========================
    Container
 ========================= */

@@ -1,40 +1,79 @@
-// script.js - full code from start
+// script.js - cleaned & fixed
 
+// -----------------------------
+// Open Features (panels) logic
+// -----------------------------
 function OpenFetures() {
-  const allElements = document.querySelectorAll(".elems");
-  const fullElements = document.querySelectorAll(".fullElem");
-  const btn = document.querySelectorAll(".fullElem .back");
+  const allElements = Array.from(document.querySelectorAll(".elems"));
+  const fullElements = Array.from(document.querySelectorAll(".fullElem"));
+  const backBtns = Array.from(document.querySelectorAll(".fullElem .back"));
+  const allfeatures = document.querySelector(".allFeatures");
+
+  // helper to open a particular index
+  function openIndex(idx) {
+    // hide all fullElems first
+    fullElements.forEach((el) => (el.style.display = "none"));
+    if (typeof fullElements[idx] !== "undefined") {
+      fullElements[idx].style.display = "block";
+      document.body.classList.add("panel-open"); // disables body scroll (CSS already has panel-open rule)
+      if (allfeatures) allfeatures.style.display = "none";
+    }
+  }
+
+  // helper to close (restore)
+  function closeIndex(idx) {
+    if (typeof fullElements[idx] !== "undefined") {
+      fullElements[idx].style.display = "none";
+    }
+    // if no other panel is visible, remove panel-open and restore features
+    const someVisible = fullElements.some((el) => el.style.display === "block");
+    if (!someVisible) {
+      document.body.classList.remove("panel-open");
+      if (allfeatures) allfeatures.style.display = "";
+    }
+  }
 
   allElements.forEach((elem) => {
     elem.addEventListener("click", () => {
-      if (fullElements[elem.id]) fullElements[elem.id].style.display = "block";
+      // elem.id in your markup are "0","1",... safe to coerce to number
+      const idx = Number(elem.id);
+      if (!isNaN(idx)) openIndex(idx);
     });
   });
 
-  btn.forEach((back) => {
+  backBtns.forEach((back) => {
     back.addEventListener("click", () => {
-      if (fullElements[back.id]) fullElements[back.id].style.display = "none";
+      const idx = Number(back.id);
+      if (!isNaN(idx)) closeIndex(idx);
+      else {
+        // fallback: close parent panel
+        const panel = back.closest(".fullElem");
+        if (panel) panel.style.display = "none";
+        const someVisible = fullElements.some((el) => el.style.display === "block");
+        if (!someVisible) {
+          document.body.classList.remove("panel-open");
+          if (allfeatures) allfeatures.style.display = "";
+        }
+      }
     });
   });
 }
-
 OpenFetures();
 
+
 // -------------------------------------------------------------
-// ToDo List Script
+// ToDo List Script (fixed important vs completed, safer DOM)
 // -------------------------------------------------------------
 function todoList() {
   const addTodosForm = document.querySelector(".addTodos form");
   const addTodosFormInput = document.querySelector(".addTodos form #userValue");
-  const addTodosFormTextarea = document.querySelector(
-    ".addTodos form textarea"
-  );
-  const addTodosFormCheckbox = document.querySelector(
-    ".addTodos form #checkbox"
-  );
+  const addTodosFormTextarea = document.querySelector(".addTodos form textarea");
+  const addTodosFormCheckbox = document.querySelector(".addTodos form #checkbox");
   const AllTaskSection = document.querySelector(".allTodos");
 
-  // setting Local Storage For TodoPage
+  // bail early if there's no task container and no form
+  if (!AllTaskSection && !addTodosForm) return;
+
   let allTasks = [];
   if (localStorage.getItem("CurrentTask")) {
     try {
@@ -45,7 +84,7 @@ function todoList() {
   }
 
   function showNoDataMessage() {
-    if (!AllTaskSection) return;
+    if (!AllTaskSection) return false;
     if (allTasks.length === 0) {
       AllTaskSection.innerHTML = `<p class="no-data">No Data to Display</p>`;
       return true;
@@ -63,15 +102,16 @@ function todoList() {
 
     let taskHTML = "";
     allTasks.forEach((element, index) => {
-      const titleClass = element.checked ? "todoTitle completed" : "todoTitle";
-      const btnText = element.checked ? "Undo" : "Mark As Completed";
-      // ensure checked value used as class for span is safe (true/false => string)
-      const impClass = element.checked ? "imp" : "";
+      // element.completed -> whether task is completed (used by markCompleted)
+      // element.important -> whether user marked it important on creation
+      const titleClass = element.completed ? "todoTitle completed" : "todoTitle";
+      const btnText = element.completed ? "Undo" : "Mark As Completed";
+      const impClass = element.important ? "imp" : "";
 
       taskHTML += `<div class="task" data-index="${index}">
-        <h5 key="${index}" class="${titleClass}">${element.task}<span class="${impClass}">imp</span></h5>
-        <button key="${index}" class="markCompleted">${btnText}</button>
-        <button key="${index}" class="delete">Delete</button>
+        <h5 class="${titleClass}">${element.task}<span class="${impClass}">imp</span></h5>
+        <button class="markCompleted">${btnText}</button>
+        <button class="delete">Delete</button>
       </div>`;
     });
 
@@ -82,7 +122,7 @@ function todoList() {
   renderTasks();
 
   // add task
-  if (addTodosForm) {
+  if (addTodosForm && addTodosFormInput && addTodosFormTextarea) {
     addTodosForm.addEventListener("submit", (e) => {
       e.preventDefault();
       const taskVal = addTodosFormInput.value.trim();
@@ -96,12 +136,13 @@ function todoList() {
       allTasks.push({
         task: taskVal,
         details: detailsVal,
-        checked: !!addTodosFormCheckbox.checked,
+        important: !!(addTodosFormCheckbox && addTodosFormCheckbox.checked),
+        completed: false, // default false; completed toggled later
       });
 
       // persist and reset
       localStorage.setItem("CurrentTask", JSON.stringify(allTasks));
-      addTodosFormCheckbox.checked = false;
+      if (addTodosFormCheckbox) addTodosFormCheckbox.checked = false;
       addTodosFormInput.value = "";
       addTodosFormTextarea.value = "";
       renderTasks();
@@ -112,11 +153,12 @@ function todoList() {
   if (AllTaskSection) {
     AllTaskSection.addEventListener("click", function (e) {
       const target = e.target;
+      const taskEl = target.closest(".task");
+      if (!taskEl) return;
+      const index = Number(taskEl.dataset.index);
 
       // delete
       if (target.classList.contains("delete")) {
-        const key = target.getAttribute("key") || target.closest(".task")?.dataset.index;
-        const index = Number(key);
         if (!isNaN(index)) {
           allTasks.splice(index, 1);
           localStorage.setItem("CurrentTask", JSON.stringify(allTasks));
@@ -127,10 +169,8 @@ function todoList() {
 
       // mark as completed / undo
       if (target.classList.contains("markCompleted")) {
-        const key = target.getAttribute("key") || target.closest(".task")?.dataset.index;
-        const index = Number(key);
         if (!isNaN(index) && allTasks[index]) {
-          allTasks[index].checked = !allTasks[index].checked;
+          allTasks[index].completed = !allTasks[index].completed;
           localStorage.setItem("CurrentTask", JSON.stringify(allTasks));
           renderTasks();
         }
@@ -138,400 +178,409 @@ function todoList() {
       }
     });
   }
-
 }
-
 todoList();
 
-//Todo List Script Completed
 
+// -------------------------------------------------------------
+// Day Planner (guarded, 24-hr TTL handling kept)
+// -------------------------------------------------------------
+function dayPlans() {
+  const TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
-//Daily Planner Script
-
-function dayPlans(){
-// script.js — day planner with 24-hour expiry
-
-const TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
-
-// load and normalize stored data
-let raw = localStorage.getItem("dayPlans");
-let dayPlans = {};
-try {
-  dayPlans = raw ? JSON.parse(raw) : {};
-} catch (e) {
-  dayPlans = {};
-}
-
-
-const now = Date.now();
-Object.keys(dayPlans).forEach((key) => {
-  const entry = dayPlans[key];
-
-  
-  if (entry === null || typeof entry === "string") {
-    dayPlans[key] = { value: String(entry || ""), ts: now };
-    return;
+  // load and normalize stored data
+  let raw = localStorage.getItem("dayPlans");
+  let dayPlans = {};
+  try {
+    dayPlans = raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    dayPlans = {};
   }
 
+  const now = Date.now();
+  Object.keys(dayPlans).forEach((key) => {
+    const entry = dayPlans[key];
 
-  if (typeof entry === "object" && entry !== null) {
-    const ts = Number(entry.ts) || 0;
-    if (now - ts > TTL_MS) {
-      delete dayPlans[key];
+    if (entry === null || typeof entry === "string") {
+      dayPlans[key] = { value: String(entry || ""), ts: now };
+      return;
     }
-    return;
-  }
-  delete dayPlans[key];
-});
 
-localStorage.setItem("dayPlans", JSON.stringify(dayPlans));
-
-const dayPlanner = document.querySelector(".dayPlanner");
-
-let hours = Array.from({ length: 18 }, function (elem, index) {
-  const startHour = 6 + index;
-  const endHour = 7 + index;
-
-  const formatHour = (hour) => {
-    const period = hour >= 12 ? "PM" : "AM";
-    const formatted = hour > 12 ? hour - 12 : hour;
-    return `${formatted}:00 ${period}`;
-  };
-
-  return `${formatHour(startHour)} - ${formatHour(endHour)}`;
-});
-
-let wholeDailyPlan = "";
-
-hours.forEach((element, index) => {
-  const savedEntry = dayPlans[index];
-  const savedPlans = savedEntry && savedEntry.value ? savedEntry.value : "";
-  wholeDailyPlan += `
-    <div class="dayPlanner-time">
-      <p>${element}</p>
-      <input id="${index}" type="text" placeholder="...." value="${String(savedPlans).replace(/"/g, "&quot;")}">
-    </div>
-  `;
-});
-
-dayPlanner.innerHTML = wholeDailyPlan;
-
-const dailyPlannerInputs = document.querySelectorAll(".dayPlanner input");
-dailyPlannerInputs.forEach((element) => {
-  element.addEventListener("input", () => {
-    const id = element.id;
-    dayPlans[id] = { value: element.value, ts: Date.now() };
-    localStorage.setItem("dayPlans", JSON.stringify(dayPlans));
+    if (typeof entry === "object" && entry !== null) {
+      const ts = Number(entry.ts) || 0;
+      if (now - ts > TTL_MS) {
+        delete dayPlans[key];
+      }
+      return;
+    }
+    delete dayPlans[key];
   });
-});
 
+  localStorage.setItem("dayPlans", JSON.stringify(dayPlans));
 
+  const dayPlanner = document.querySelector(".dayPlanner");
+  if (!dayPlanner) return; // guard: exit if no planner on page
+
+  let hours = Array.from({ length: 18 }, function (elem, index) {
+    const startHour = 6 + index;
+    const endHour = 7 + index;
+
+    const formatHour = (hour) => {
+      const period = hour >= 12 ? "PM" : "AM";
+      const formatted = hour > 12 ? hour - 12 : hour;
+      return `${formatted}:00 ${period}`;
+    };
+
+    return `${formatHour(startHour)} - ${formatHour(endHour)}`;
+  });
+
+  let wholeDailyPlan = "";
+
+  hours.forEach((element, index) => {
+    const savedEntry = dayPlans[index];
+    const savedPlans = savedEntry && savedEntry.value ? savedEntry.value : "";
+    wholeDailyPlan += `
+      <div class="dayPlanner-time">
+        <p>${element}</p>
+        <input id="${index}" type="text" placeholder="...." value="${String(savedPlans).replace(/"/g, "&quot;")}">
+      </div>
+    `;
+  });
+
+  dayPlanner.innerHTML = wholeDailyPlan;
+
+  const dailyPlannerInputs = document.querySelectorAll(".dayPlanner input");
+  dailyPlannerInputs.forEach((element) => {
+    element.addEventListener("input", () => {
+      const id = element.id;
+      dayPlans[id] = { value: element.value, ts: Date.now() };
+      localStorage.setItem("dayPlans", JSON.stringify(dayPlans));
+    });
+  });
 }
-
 dayPlans();
 
-// Motivation Quotes Script 333333333333333333333333333333333.......................................................
 
-function motivationQuoteContent(){
-  const motivationQuotes=document.querySelector(".motivation-2 p");
-const motivationQuotesAuthor=document.querySelector(".motivation-3 h2");
+// -------------------------------------------------------------
+// Motivation Quotes (simple fetch, guarded)
+// -------------------------------------------------------------
+function motivationQuoteContent() {
+  const motivationQuotes = document.querySelector(".motivation-2 p");
+  const motivationQuotesAuthor = document.querySelector(".motivation-3 h2");
+  if (!motivationQuotes || !motivationQuotesAuthor) return;
 
-async function fetchMotivationQuote(){
-  let response=await fetch("https://quotes-api-self.vercel.app/quote");
-  const data=await response.json();
-  motivationQuotes.innerHTML=data.quote;
-  motivationQuotesAuthor.innerHTML=`- ${data.author}`;
-
+  async function fetchMotivationQuote() {
+    try {
+      let response = await fetch("https://quotes-api-self.vercel.app/quote");
+      if (!response.ok) throw new Error("Quote fetch failed");
+      const data = await response.json();
+      motivationQuotes.innerHTML = data.quote || "Stay motivated!";
+      motivationQuotesAuthor.innerHTML = data.author ? `- ${data.author}` : "";
+    } catch (err) {
+      console.warn("Quote fetch failed:", err);
+      motivationQuotes.innerHTML = "Stay motivated!";
+      motivationQuotesAuthor.innerHTML = "";
+    }
+  }
+  fetchMotivationQuote();
 }
-fetchMotivationQuote();
-}
-
 motivationQuoteContent();
 
 
-// Pomodoro Timer Script 444444444444444444444444444444444444444444444444444444444
+// -------------------------------------------------------------
+// Pomodoro Timer (defensive)
+// -------------------------------------------------------------
+function PomodoroTimer() {
+  const pomoTimerTime = document.querySelector(".pomodoroTimer .h2");
+  const startbtn = document.querySelector(".startTimer");
+  const pausebtn = document.querySelector(".pauseTimer");
+  const resetbtn = document.querySelector(".resetTimer");
+  const session = document.querySelector(".pomodoroTimerFullPage .session");
 
-function PomodoroTimer(){
-let pomoTimerTime = document.querySelector(".pomodoroTimer .h2");
-let startbtn = document.querySelector(".startTimer");
-let pausebtn = document.querySelector(".pauseTimer");
-let resetbtn = document.querySelector(".resetTimer");
-let session = document.querySelector(".pomodoroTimerFullPage .session");
-let workSession = true;
-let totalSeconds = 25 * 60;
-let minutesLeft = null;
+  if (!pomoTimerTime) return; // nothing to do
 
-function upDtateTime() {
-  let minutes = Math.floor(totalSeconds / 60);
-  let seconds = totalSeconds % 60;
-  pomoTimerTime.innerHTML = `${String(minutes).padStart("2", "0")}:${String(seconds).padStart("2", "0")}`;
-}
+  let workSession = true;
+  let totalSeconds = 25 * 60;
+  let minutesLeft = null;
 
-startbtn.addEventListener("click", startTimer);
-pausebtn.addEventListener("click", pauseTimer);
-resetbtn.addEventListener("click", resetTimer);
-
-function startTimer() {
-  clearInterval(minutesLeft);
-  if (workSession) {
-    // start work session (25:00)
-    totalSeconds = 25 * 60;
-    minutesLeft = setInterval(function () {
-      if (totalSeconds > 0) {
-        totalSeconds--;
-      } else {
-        workSession = false;
-        clearInterval(minutesLeft);
-        totalSeconds = 5 * 60;
-        session.innerHTML = "Break";
-        session.style.backgroundColor = "var(--blue)";
-      }
-      upDtateTime();
-    }, 1000); 
-  } else {
-    // start break session (05:00)
-    totalSeconds = 5 * 60;
-    minutesLeft = setInterval(function () {
-      if (totalSeconds > 0) {
-        totalSeconds--;
-      } else {
-        workSession = true;
-        clearInterval(minutesLeft);
-        totalSeconds = 25 * 60; 
-        session.innerHTML = "Work Session";
-        session.style.backgroundColor = "var(--green)";
-      }
-      upDtateTime();
-    }, 1000); 
+  function upDtateTime() {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    pomoTimerTime.innerHTML = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   }
-}
 
-function pauseTimer() {
-  clearInterval(minutesLeft);
-}
+  if (startbtn) startbtn.addEventListener("click", startTimer);
+  if (pausebtn) pausebtn.addEventListener("click", pauseTimer);
+  if (resetbtn) resetbtn.addEventListener("click", resetTimer);
 
-function resetTimer() {
-  totalSeconds = 25 * 60;
-  clearInterval(minutesLeft);
+  function startTimer() {
+    clearInterval(minutesLeft);
+    if (workSession) {
+      totalSeconds = 25 * 60;
+      minutesLeft = setInterval(function () {
+        if (totalSeconds > 0) totalSeconds--;
+        else {
+          workSession = false;
+          clearInterval(minutesLeft);
+          totalSeconds = 5 * 60;
+          if (session) {
+            session.innerHTML = "Break";
+            session.style.backgroundColor = "var(--blue)";
+          }
+        }
+        upDtateTime();
+      }, 1000);
+    } else {
+      totalSeconds = 5 * 60;
+      minutesLeft = setInterval(function () {
+        if (totalSeconds > 0) totalSeconds--;
+        else {
+          workSession = true;
+          clearInterval(minutesLeft);
+          totalSeconds = 25 * 60;
+          if (session) {
+            session.innerHTML = "Work Session";
+            session.style.backgroundColor = "var(--green)";
+          }
+        }
+        upDtateTime();
+      }, 1000);
+    }
+  }
+
+  function pauseTimer() {
+    clearInterval(minutesLeft);
+  }
+
+  function resetTimer() {
+    totalSeconds = 25 * 60;
+    clearInterval(minutesLeft);
+    upDtateTime();
+  }
+
   upDtateTime();
-}
-
-upDtateTime();
 }
 PomodoroTimer();
 
 
+// -------------------------------------------------------------
+// Notes App (guarded)
+// -------------------------------------------------------------
+function Notes() {
+  function NotesApp() {
+    const addNoteButton = document.querySelector(".AddNote");
+    const AllNotes = document.querySelector(".AllNotes");
 
-//Notes App Script 5555555555555555555555555555555555555555555555555555555555555555555555555555555555555
-function Notes(){
-  function NotesApp(){
-  const addNoteButton = document.querySelector(".AddNote");
-const AllNotes = document.querySelector(".AllNotes");
+    if (!AllNotes) {
+      console.error("Notes container (.AllNotes) not found — notes disabled on this page.");
+      return;
+    }
 
-if (addNoteButton) {
-  addNoteButton.addEventListener("click", () => {
-    addNote();
-  });
-} else {
-  console.error("❌ Element with class '.AddNote' not found in DOM");
-}
+    if (addNoteButton) {
+      addNoteButton.addEventListener("click", () => addNote());
+    } else {
+      console.warn("AddNote button not found.");
+    }
 
-function addNote(text = "") {
-  const note = document.createElement("div");
-  note.classList.add("note");
-  note.innerHTML = `
-  <div class="tool">
-    <button class="deleted">Delete</button>
-    <button class="save">Save</button>
-  </div>
-  <textarea>${text}</textarea>
-  `;
+    function addNote(text = "") {
+      const note = document.createElement("div");
+      note.classList.add("note");
+      note.innerHTML = `
+        <div class="tool">
+          <button class="deleted">Delete</button>
+          <button class="save">Save</button>
+        </div>
+        <textarea>${text}</textarea>
+      `;
 
-  note.querySelector(".deleted").addEventListener("click", () => {
-    note.remove();
-    saveNote();
-  });
+      note.querySelector(".deleted").addEventListener("click", () => {
+        note.remove();
+        saveNote();
+      });
 
-  note.querySelector(".save").addEventListener("click", () => {
-    saveNote();
-  });
+      note.querySelector(".save").addEventListener("click", () => {
+        saveNote();
+      });
 
-  // changed focusout → blur (more reliable)
-  note.querySelector("textarea").addEventListener("blur", () => {
-    saveNote();
-  });
+      note.querySelector("textarea").addEventListener("blur", () => {
+        saveNote();
+      });
 
-  AllNotes.appendChild(note);
-  saveNote();
-}
+      AllNotes.appendChild(note);
+      saveNote();
+    }
 
-function saveNote() {
-  const notes = document.querySelectorAll(".note textarea");
-  const data = [];
-  notes.forEach((element) => {
-    data.push(element.value);
-  });
-  if (data.length === 0) {
-    localStorage.removeItem("savedNotes");
-  } else {
-    localStorage.setItem("savedNotes", JSON.stringify(data));
+    function saveNote() {
+      const notes = document.querySelectorAll(".note textarea");
+      const data = [];
+      notes.forEach((element) => {
+        data.push(element.value);
+      });
+      if (data.length === 0) {
+        localStorage.removeItem("savedNotes");
+      } else {
+        localStorage.setItem("savedNotes", JSON.stringify(data));
+      }
+    }
+
+    (function () {
+      const getNote = JSON.parse(localStorage.getItem("savedNotes"));
+      if (getNote === null || getNote.length === 0) {
+        addNote();
+      } else {
+        getNote.forEach((element) => addNote(element));
+      }
+    })();
   }
-}
 
-(function () {
-  const getNote = JSON.parse(localStorage.getItem("savedNotes"));
-  if (getNote === null) {
-    addNote();
-  } else {
-    getNote.forEach((element) => {
-      addNote(element);
-    });
-  }
-})();
+  NotesApp();
 }
-
-NotesApp();
-}
-
 Notes();
 
 
-//Productivity Tracker Script 66666666666666666666666666666666666666666666
-function productivityTracker(){
-  
-const ctx = document.getElementById('myChart');
+// -------------------------------------------------------------
+// Productivity Tracker (guarded)
+// -------------------------------------------------------------
+function productivityTracker() {
+  const canvas = document.getElementById("myChart");
+  if (!canvas) return;
 
-let productivityChart = new Chart(ctx, {
-  type: 'bar',
-  data: {
-    labels: [], // labels go here
-    datasets: [{
-      label: 'Hours Spent',
-      data: [], // data goes here
-      backgroundColor: '#52120b', // red bars
-      borderColor: 'darkred',
-      borderWidth: 1
-    }]
-  },
-  options: {
-    responsive: true,
-    scales: {
-      y: {
-        beginAtZero: true
-      }
+  const ctx = canvas.getContext ? canvas.getContext("2d") : null;
+  if (!ctx) {
+    console.error("Canvas context not available for Chart.");
+    return;
+  }
+
+  let productivityChart = new Chart(canvas, {
+    type: "bar",
+    data: {
+      labels: [],
+      datasets: [
+        {
+          label: "Hours Spent",
+          data: [],
+          backgroundColor: "#52120b",
+          borderColor: "darkred",
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      scales: { y: { beginAtZero: true } },
+    },
+  });
+
+  const form = document.querySelector("#dataForm");
+  if (!form) return;
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const task = document.querySelector("#task").value.trim();
+    const hoursInput = document.querySelector("#hours").value;
+    const hours = Number(hoursInput);
+    if (task && !isNaN(hours) && hours >= 0) {
+      productivityChart.data.labels.push(task);
+      productivityChart.data.datasets[0].data.push(hours);
+      productivityChart.update();
+      document.querySelector("#task").value = "";
+      document.querySelector("#hours").value = "";
     }
-  }
-});
-
-document.querySelector("#dataForm").addEventListener("submit", (e) => {
-  e.preventDefault();
-  let task = document.querySelector("#task").value;
-  let hours = document.querySelector("#hours").value;
-
-  if (task && hours) {
-    // ✅ Correct property paths
-    productivityChart.data.labels.push(task);
-    productivityChart.data.datasets[0].data.push(hours);
-    productivityChart.update();
-    document.querySelector("#task").value="";
-    document.querySelector("#hours").value="";
-  }
-
-});
-
+  });
 }
 productivityTracker();
 
 
-// Weather Podcast Script 777777777777777777777777777777777777777777777777777777777777
-function weatherPodcast(){
-let header1Data = document.querySelector(".header-1 h1");
-let header1Date = document.querySelector(".header-1 .h2");
-let temp = document.querySelector(".header-2 .temp");
-let condition = document.querySelector(".header-2 .condition");
-let preciption = document.querySelector(".header-2 .preciption");
-let humidity = document.querySelector(".header-2 .humidity");
-let wind = document.querySelector(".header-2 .wind");
+// -------------------------------------------------------------
+// Weather Podcast (fixed https and q param handling & guards)
+// -------------------------------------------------------------
+function weatherPodcast() {
+  const header1Data = document.querySelector(".header-1 h1");
+  const header1Date = document.querySelector(".header-1 .h2");
+  const temp = document.querySelector(".header-2 .temp");
+  const condition = document.querySelector(".header-2 .condition");
+  const preciption = document.querySelector(".header-2 .preciption");
+  const humidity = document.querySelector(".header-2 .humidity");
+  const wind = document.querySelector(".header-2 .wind");
 
-let weatherApiKey = "456b683fa5ca457ab7c62509250911";
-let data = null;
+  // if header not present, bail
+  if (!header1Date || !header1Data) return;
 
-// Function to get weather data using coordinates
-async function weatherApiCall(query) {
-  try {
-    let response = await fetch(`https://api.weatherapi.com/v1/current.json?key=${weatherApiKey}&q=${query}`);
-    data = await response.json();
-    updateWeatherDOM(); // Update DOM after data is fetched
-  } catch (error) {
-    console.error("Weather API error:", error);
+  const weatherApiKey = "456b683fa5ca457ab7c62509250911";
+  let data = null;
+
+  // Function to get weather data using coordinates or city
+  async function weatherApiCall(latOrCity, lon) {
+    try {
+      // support either (lat, lon) OR (cityString)
+      const q = typeof lon === "undefined" ? encodeURIComponent(latOrCity) : `${latOrCity},${lon}`;
+      // use https to avoid mixed-content errors
+      const url = `https://api.weatherapi.com/v1/current.json?key=${weatherApiKey}&q=${q}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Weather fetch failed");
+      data = await response.json();
+    } catch (error) {
+      console.error("Weather API error:", error);
+      data = null;
+    }
   }
-}
 
-// Update weather DOM
-function updateWeatherDOM() {
-  if (!data) return;
-  preciption.innerHTML = `Heat Index: ${data.current.heatindex_c} °C`;
-  humidity.innerHTML = `Humidity: ${data.current.humidity}%`;
-  wind.innerHTML = `Wind: ${data.current.wind_kph} Km/h`;
-  temp.innerHTML = `${data.current.temp_c} °C`;
-  condition.innerHTML = `${data.current.condition.text}`;
-}
-
-// Function to get user's location
-function getLocationAndWeather() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        let lat = position.coords.latitude;
-        let lon = position.coords.longitude;
-        weatherApiCall(`${lat},${lon}`);
-      },
-      (error) => {
-        console.warn("Geolocation failed, defaulting to Meerut");
-        weatherApiCall("Meerut");
-      }
-    );
-  } else {
-    console.warn("Geolocation not supported, defaulting to Meerut");
-    weatherApiCall("Meerut");
+  // Function to get user's location
+  function getLocationAndWeather() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          weatherApiCall(lat, lon);
+        },
+        (error) => {
+          console.warn("Geolocation failed, defaulting to Meerut");
+          weatherApiCall("Meerut"); // city fallback
+        }
+      );
+    } else {
+      console.warn("Geolocation not supported, defaulting to Meerut");
+      weatherApiCall("Meerut");
+    }
   }
+
+  getLocationAndWeather();
+
+  function timeDate() {
+    const months = [
+      "January","February","March","April","May","June",
+      "July","August","September","October","November","December"
+    ];
+    const week = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+    const date = new Date();
+    const dayOfWeek = week[date.getDay()];
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+    const todayDate = date.getDate();
+    const month = date.getMonth();
+    const year = date.getFullYear();
+
+    // Only update weather info if data is available
+    if (data && data.current) {
+      if (preciption) preciption.innerHTML = `Heat Index: ${data.current.heatindex_c ?? data.current.temp_c} °C`;
+      if (humidity) humidity.innerHTML = `Humidity: ${data.current.humidity}%`;
+      if (wind) wind.innerHTML = `Wind: ${data.current.wind_kph} Km/h`;
+      if (temp) temp.innerHTML = `${data.current.temp_c} °C`;
+      if (condition) condition.innerHTML = `${data.current.condition?.text ?? ""}`;
+    }
+
+    header1Date.innerHTML = `${todayDate} ${months[month]}, ${year}`;
+
+    if (hours > 12) {
+      header1Data.innerHTML = `${dayOfWeek}, ${String(hours - 12).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")} PM`;
+    } else {
+      header1Data.innerHTML = `${dayOfWeek}, ${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")} AM`;
+    }
+  }
+
+  // Update every second
+  setInterval(timeDate, 1000);
 }
-
-getLocationAndWeather();
-
-function timeDate() {
-  const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
-  const week = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
-  let date = new Date();
-  let dayOfWeek = week[date.getDay()];
-  let hours = date.getHours();
-  let minutes = date.getMinutes();
-  let seconds = date.getSeconds();
-  let todayDate = date.getDate();
-  let month = date.getMonth();
-  let year = date.getFullYear();
-
-  header1Date.innerHTML = `${todayDate} ${months[month]}, ${year}`;
-  header1Data.innerHTML = `${dayOfWeek}, ${String(hours % 12 || 12).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")} ${hours >= 12 ? 'PM' : 'AM'}`;
-}
-
-// Update every second
-setInterval(timeDate, 1000);
-
-
-
-}
-
 weatherPodcast();
-
-
-
-
-
-
-
-

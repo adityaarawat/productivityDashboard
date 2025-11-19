@@ -1,4 +1,4 @@
-:root{
+:root {
   --bg-gradient: linear-gradient(to bottom right, #1e0b0b, #1e0b0b);
   --bg-radial: radial-gradient(circle at center, #420505, #460d0d);
   --background: var(--bg-gradient), var(--bg-radial);
@@ -11,8 +11,8 @@
   --border-color: rgba(255, 255, 255, 0.1);
   --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   --hover-glow: 0 0 10px rgba(231, 7, 7, 0.871);
-  --green:rgba(11, 72, 11, 0.43);
-  --blue:rgba(21, 21, 60, 0.552);
+  --green: rgba(11, 72, 11, 0.43);
+  --blue: rgba(21, 21, 60, 0.552);
 }
 
 @font-face {
@@ -36,9 +36,7 @@
   src: url(./Inter-ExtraBold.otf);
 }
 
-
-
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -46,9 +44,9 @@
 }
 
 html, body {
-    width: 100%;
-  min-height: 100%;
-  height: 100%;
+  width: 100%;
+  /* min-height: 100%;
+  height: 100%; */
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   display: flex;
   flex-direction: column;
@@ -56,10 +54,33 @@ html, body {
 
 body {
   background-image: var(--background);
+  background-blend-mode: var(--bg-blend-mode);
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  height: 100%;
 }
 
-#main{
+body.panel-open {
+  overflow: hidden;
+  width: 100%;
+}
+
+body.panel-open .allElements {
+  pointer-events: none;
+  user-select: none;
+  touch-action: none;
+}
+
+/* FIX: Updated #main container to ensure proper flex layout */
+#main {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  height: 100%;
+  position: relative;
 }
 
 nav {
@@ -77,9 +98,10 @@ nav {
   box-sizing: border-box;
 }
 
-nav h1{
+nav h1 {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
+
 nav .Connect a {
   text-decoration: none;
   background-color: var(--primary);
@@ -116,6 +138,10 @@ nav .Connect a:hover {
     height: auto;
     padding: 10px;
   }
+  nav h1 {
+    font-size: 18px;
+    margin-bottom: 5px;
+  }
   nav .Connect a {
     font-size: 14px;
     padding: 6px 10px;
@@ -127,47 +153,49 @@ nav .Connect a:hover {
   nav {
     padding: 8px;
   }
+  nav h1 {
+    font-size: 16px;
+  }
   nav .Connect a {
     font-size: 13px;
     padding: 5px 8px;
   }
 }
 
-
-section.allElements{
+section.allElements {
   margin-top: 20px;
   width: 100%;
-  height: 100%;
+  /* height: 100%; */
   padding: 40px;
-  padding-top: 80px; 
+  padding-top: 80px;
+  flex: 1;
+
 }
 
 .allElements header {
   width: 100%;
   background-image: url('images/weatherImage.jpg');
-  background-size: cover;      
-  background-position: center;  
+  background-size: cover;
+  background-position: center;
   background-repeat: no-repeat;
   background-blend-mode: overlay;
-  background-position: top;
   margin-bottom: 30px;
-
   border-radius: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 60px;
-  flex-wrap: wrap; 
+  flex-wrap: wrap;
   box-sizing: border-box;
   min-height: 400px;
-  height: auto; 
+  height: auto;
 }
 
 .header-1 h1 {
   font-size: 70px;
   margin-top: 30px;
-  word-break: break-word; /* prevents overflow */
-  text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.7); /* deep shadow */
+  word-break: break-word;
+  text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.7);
 }
 
 .header-1 h2 {
@@ -231,7 +259,6 @@ section.allElements{
   }
   .header-2 h2 {
     font-size: 30px;
-
   }
   .header-2 h3 {
     font-size: 25px;
@@ -258,44 +285,46 @@ section.allElements{
     font-size: 18px;
   }
 }
-.allElements .allFeatures{
+
+.allElements .allFeatures {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-   gap: 40px;
-   justify-content: space-between;
+  gap: 40px;
+  justify-content: center;
 }
 
-.elems{
+.elems {
   background-color: var(--primary);
-  height: 400px;
-  width: 400px;
+  height: 300px;
+  width: 300px;
   font-size: 30px;
-  border-radius:20px;
+  border-radius: 20px;
   position: relative;
   overflow: hidden;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   cursor: pointer;
 }
 
-.elems:active{
+.elems:active {
   transform: scale(0.98);
 }
 
-.elems img{
+.elems img {
   width: 100%;
   height: 100%;
-  object-fit:cover;
+  object-fit: cover;
 }
 
+/* FIX: Updated fullElem to take full viewport height */
 
-
-.fullElem{
+.fullElem {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  /* height: 100vh; Changed from 100% to 100vh to ensure full viewport height */
   padding: 40px;
   font-size: 30px;
   display: none;
@@ -303,8 +332,10 @@ section.allElements{
   z-index: 100;
   pointer-events: auto;
   overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  will-change: transform;
 }
-
 
 .fullElem .back {
   position: absolute;
@@ -345,8 +376,38 @@ body.panel-open .allElements {
   user-select: none;
 }
 
+/* Responsive adjustments for elems */
+@media (max-width: 1200px) {
+  .elems {
+    height: 250px;
+    width: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  .elems {
+    height: 200px;
+    width: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .elems {
+    height: 150px;
+    width: 150px;
+  }
+  .allElements .allFeatures {
+    gap: 20px;
+  }
+}
+
 /* toDo Page Styling */
-/* Base Styles */
+.todoListFullPage {
+  /* height: 100vh; Changed from 100% to 100vh */
+  width: 100%;
+  height: 100vh;
+}
+
 .todoListFullPage h1 {
   font-size: 25px;
   text-align: center;
@@ -354,20 +415,18 @@ body.panel-open .allElements {
 }
 
 .todoListFullPage .todoContainer {
-  height: 80%;
   margin-top: 40px;
   width: 100%;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
-  flex-wrap: wrap; /* allow stacking on small screens */
+  flex-wrap: wrap;
 }
 
 .todoListFullPage .todoContainer .addTodos {
   width: 33%;
-  min-width: 280px; /* prevent too small on mobile */
-  height: 100%;
+  min-width: 280px;
   background-color: var(--secondary);
   border-radius: 10px;
   box-sizing: border-box;
@@ -389,7 +448,7 @@ body.panel-open .allElements {
   border: none;
   color: var(--text-light);
   border-radius: 5px;
-  resize: vertical; /* textarea can resize vertically */
+  resize: vertical;
 }
 
 .markImportant {
@@ -429,7 +488,6 @@ body.panel-open .allElements {
 .todoListFullPage .todoContainer .allTodos {
   width: 65%;
   min-width: 280px;
-  height: 100%;
   border-radius: 10px;
   background-color: var(--secondary);
   display: flex;
@@ -546,7 +604,6 @@ body.panel-open .allElements {
 /* Responsive Adjustments */
 @media (max-width: 1024px) {
   .todoListFullPage .todoContainer {
-    flex-direction: column;
     align-items: center;
     margin-top: 20px;
   }
@@ -554,7 +611,6 @@ body.panel-open .allElements {
   .todoListFullPage .todoContainer .addTodos,
   .todoListFullPage .todoContainer .allTodos {
     width: 90%;
-    height: auto;
   }
 
   .todoListFullPage h1 {
@@ -566,12 +622,13 @@ body.panel-open .allElements {
   .todoListFullPage h1 {
     font-size: 20px;
   }
-  .todoListFullPage .todoContainer{
+  .todoListFullPage .todoContainer {
     display: block;
   }
   .todoListFullPage .todoContainer .addTodos,
   .todoListFullPage .todoContainer .allTodos {
     width: 100%;
+    margin-bottom: 10px;
   }
 
   .todoListFullPage .todoContainer .allTodos {
@@ -583,28 +640,28 @@ body.panel-open .allElements {
   }
 }
 
-
-
-/* Daily Planner Styling  2222222222222222222222222222222222222222222222222222222222222222 */
-.dailyPlannerFullPage{
+/* Daily Planner Styling */
+.dailyPlannerFullPage {
   overflow: hidden;
-  display: flex;
+  display: none;
   justify-content: space-around;
   flex-direction: column;
+  height: 100vh; /* Changed from 100% to 100vh */
 }
-.dailyPlannerFullPage h1{
-  font-size: 70px;
+
+.dailyPlannerFullPage h1 {
+  font-size: 50px;
   margin-top: 20px;
   font-family: Inter;
   font-weight: 700;
   color: var(--text-light);
 }
 
-.dailyPlannerFullPage .dayPlanner{
+.dailyPlannerFullPage .dayPlanner {
   background-color: var(--secondary);
   width: 100%;
-  height: 85%;
-  margin-top: 40px;
+  margin-top: 10px;
+  height: 80%;
   border-radius: 10px;
   padding: 30px;
   display: flex;
@@ -613,7 +670,7 @@ body.panel-open .allElements {
   flex-wrap: wrap;
   overflow: hidden;
   overflow-y: auto;
-   scrollbar-width: thin;
+  scrollbar-width: thin;
   scrollbar-color: #3f0f0f #000000;
 }
 
@@ -622,21 +679,21 @@ body.panel-open .allElements {
 }
 
 .dailyPlannerFullPage .dayPlanner::-webkit-scrollbar-track {
-  background: #000000; /* track color */
+  background: #000000;
   border-radius: 10px;
 }
 
 .dailyPlannerFullPage .dayPlanner::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #ff0000, #8b0000); /* red gradient */
+  background: linear-gradient(180deg, #ff0000, #8b0000);
   border-radius: 10px;
-  border: 2px solid #000000; /* optional border */
+  border: 2px solid #000000;
 }
 
 .dailyPlannerFullPage .dayPlanner::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #ff4d4d, #b30000); /* hover gradient */
+  background: linear-gradient(180deg, #ff4d4d, #b30000);
 }
 
-.dailyPlannerFullPage .dayPlanner .dayPlanner-time{
+.dailyPlannerFullPage .dayPlanner .dayPlanner-time {
   display: flex;
   align-items: center;
   position: relative;
@@ -644,7 +701,7 @@ body.panel-open .allElements {
   margin-bottom: 25px;
 }
 
-.dailyPlannerFullPage .dayPlanner .dayPlanner-time input{
+.dailyPlannerFullPage .dayPlanner .dayPlanner-time input {
   padding: 20px 45px;
   width: 100%;
   background-color: var(--secondary);
@@ -655,7 +712,8 @@ body.panel-open .allElements {
   padding-top: 35px;
   font-weight: 700;
 }
-.dailyPlannerFullPage .dayPlanner .dayPlanner-time p{
+
+.dailyPlannerFullPage .dayPlanner .dayPlanner-time p {
   position: absolute;
   top: 12%;
   left: 1%;
@@ -663,45 +721,85 @@ body.panel-open .allElements {
   color: #ffffffe0;
 }
 
+/* Responsive for Daily Planner */
+@media (max-width: 768px) {
+  .dailyPlannerFullPage h1 {
+    font-size: 40px;
+  }
 
-/* Motivation Full Page Styling 33333333333333333333333333333333333333333333333333333333333333333*/
-.motivationalFullPage h1{
+  .dailyPlannerFullPage .dayPlanner .dayPlanner-time {
+    width: 100%;
+  }
+
+  .dailyPlannerFullPage .dayPlanner .dayPlanner-time input {
+    font-size: 20px;
+    padding: 15px 30px;
+    padding-top: 30px;
+  }
+
+  .dailyPlannerFullPage .dayPlanner .dayPlanner-time p {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dailyPlannerFullPage h1 {
+    font-size: 30px;
+  }
+
+  .dailyPlannerFullPage .dayPlanner .dayPlanner-time input {
+    font-size: 16px;
+    padding: 10px 20px;
+    padding-top: 25px;
+  }
+
+  .dailyPlannerFullPage .dayPlanner .dayPlanner-time p {
+    font-size: 12px;
+  }
+}
+
+/* Motivation Full Page Styling */
+.motivationalFullPage {
+  height: 100%;
+}
+
+.motivationalFullPage h1 {
   margin-top: 20px;
 }
-.motivationalFullPage .motivationContainer{
+
+.motivationalFullPage .motivationContainer {
   margin-top: 60px;
   height: 500px;
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%,-50%);
+  transform: translate(-50%, -50%);
   width: 80%;
   border-radius: 50px;
 }
-.motivationalFullPage .motivationContainer::after{
+
+.motivationalFullPage .motivationContainer::after {
   content: "";
   height: 100%;
   width: 100%;
   position: absolute;
-   background: linear-gradient(135deg, rgba(231,7,7,0.28), rgba(152, 148, 148, 0.12));
+  background: linear-gradient(135deg, rgba(231, 7, 7, 0.28), rgba(152, 148, 148, 0.12));
   border-radius: 50px;
   scale: 1.15;
   z-index: 8;
   filter: blur(80px);
 }
-.motivationalFullPage .motivationContainer .motivationWrapper{
+
+.motivationalFullPage .motivationContainer .motivationWrapper {
   z-index: 10;
   position: absolute;
   width: 100%;
-  background: radial-gradient(circle at 20% 30%,
-  rgba(47, 9, 9, 0.18) 0%,
-  rgba(139,0,0,0.08) 20%,
-  rgba(0,0,0,0.7) 80%);
+  background: radial-gradient(circle at 20% 30%, rgba(47, 9, 9, 0.18) 0%, rgba(139, 0, 0, 0.08) 20%, rgba(0, 0, 0, 0.7) 80%);
   padding: 15px;
   border-radius: 40px;
 }
 
-.motivationalFullPage .motivationContainer .motivationWrapper img{
+.motivationalFullPage .motivationContainer .motivationWrapper img {
   position: absolute;
   right: 5%;
   top: 5%;
@@ -709,77 +807,122 @@ body.panel-open .allElements {
   height: 6vh;
 }
 
-.motivation-1{
+.motivation-1 {
   border-radius: 30px;
   padding: 30px;
 }
-.motivation-1 h2{
+
+.motivation-1 h2 {
   width: fit-content;
   font-size: 40px;
   font-weight: 700;
   border-bottom: 4px solid #ffffffbd;
-   text-shadow: 1px 2px 6px #000000, 0 0 4px #f81f1f, 0 0 25px #f86666;
+  text-shadow: 1px 2px 6px #000000, 0 0 4px #f81f1f, 0 0 25px #f86666;
 }
-.motivation-2{
+
+.motivation-2 {
   padding: 10px;
 }
-.motivation-2 p{
+
+.motivation-2 p {
   font-size: 40px;
   font-weight: 50px;
   color: var(--text-light);
   font-weight: 500;
 }
-.motivation-3{
+
+.motivation-3 {
   display: flex;
   align-items: center;
   justify-content: flex-end;
 }
-.motivation-3 h2{
+
+.motivation-3 h2 {
   font-size: 35px;
   width: fit-content;
   text-align: right;
   border-bottom: 2px solid #f5f5f5d8;
-   text-shadow: 1px 2px 6px #000000, 0 0 4px #f81f1f, 0 0 25px #f86666;
+  text-shadow: 1px 2px 6px #000000, 0 0 4px #f81f1f, 0 0 25px #f86666;
 }
 
+/* Responsive for Motivation Page */
+@media (max-width: 768px) {
+  .motivationalFullPage .motivationContainer {
+    width: 90%;
+    height: 400px;
+  }
 
-/* Pomodoro Styling 44444444444444444444444444444444444444444444444 */
+  .motivation-1 h2 {
+    font-size: 30px;
+  }
 
+  .motivation-2 p {
+    font-size: 28px;
+  }
 
-.pomodoroTimerFullPage h1 {
-  font-size: 45px;
-  text-align: center;
-  margin-top: 15px;
+  .motivation-3 h2 {
+    font-size: 25px;
+  }
 }
 
+@media (max-width: 480px) {
+  .motivationalFullPage .motivationContainer {
+    width: 95%;
+    height: 350px;
+  }
+
+  .motivation-1 {
+    padding: 15px;
+  }
+
+  .motivation-1 h2 {
+    font-size: 24px;
+  }
+
+  .motivation-2 p {
+    font-size: 20px;
+  }
+
+  .motivation-3 h2 {
+    font-size: 20px;
+  }
+}
+
+/* Pomodoro Styling */
+
+----------------------------- */
+.pomodoroTimerFullPage {
+  height: 100vh;
+  border: 20px solid red;
+}
+
+/* Session Info */
 .pomodoroTimerFullPage .session {
-  position: absolute;
-  top: 20%;
-  left: 50%;
-  transform: translate(-50%, 0);
   background-color: var(--green);
   font-weight: 500;
   border-radius: 5px;
   padding: 15px 30px;
   font-size: 40px;
   text-align: center;
+  margin-top: 40px;
+  margin-bottom: 40px;
 }
-
+.pomodoroTimerFullPage h1{
+  margin-top: 40px;
+}
+/* Timer Container */
 .pomodoroTimerFullPage .pomodoroTimer {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   text-align: center;
 }
 
+/* Timer Number */
 .pomodoroTimer h2 {
-  font-size: 150px;
+  font-size: 100px;
   font-weight: 500;
   margin: 0;
-  margin-top: 35px;
 }
 
+/* Buttons */
 .pomodoroTimer button {
   font-size: 30px;
   margin: 10px;
@@ -796,14 +939,10 @@ body.panel-open .allElements {
   box-shadow: 0px 0px 0px 0px #fff;
 }
 
-/* Responsive Styles */
-
-/* Large Tablets / small screens */
+/* -----------------------------
+Responsive Styles
+----------------------------- */
 @media (max-width: 1024px) {
-  .pomodoroTimerFullPage h1 {
-    font-size: 45px;
-  }
-
   .pomodoroTimerFullPage .session {
     font-size: 35px;
     padding: 12px 25px;
@@ -817,14 +956,14 @@ body.panel-open .allElements {
     font-size: 25px;
     padding: 12px 30px;
   }
+
+  .AddPomodoroButton {
+    font-size: 24px;
+    padding: 4px 8px;
+  }
 }
 
-/* Medium Tablets / small laptops */
 @media (max-width: 768px) {
-  .pomodoroTimerFullPage h1 {
-    font-size: 40px;
-  }
-
   .pomodoroTimerFullPage .session {
     font-size: 30px;
     padding: 10px 20px;
@@ -838,16 +977,15 @@ body.panel-open .allElements {
     font-size: 22px;
     padding: 10px 25px;
   }
+
+  .AddPomodoroButton {
+    font-size: 22px;
+    padding: 3px 6px;
+  }
 }
 
-/* Mobile Devices */
 @media (max-width: 480px) {
-  .pomodoroTimerFullPage h1 {
-    font-size: 30px;
-  }
-
   .pomodoroTimerFullPage .session {
-    top: 15%;
     font-size: 24px;
     padding: 8px 15px;
   }
@@ -861,113 +999,106 @@ body.panel-open .allElements {
     padding: 8px 20px;
     margin: 5px;
   }
+
+  .AddPomodoroButton {
+    font-size: 20px;
+    padding: 3px 6px;
+  }
 }
 
 
-/* Note App Section 4444444444444444444444444444444444444444 */
 
-.NotesFullPage{
-  width: 100%;
-}
-.NotesFullPage::-webkit-scrollbar {
-  width: 10px;
-}
-
-.NotesFullPage::-webkit-scrollbar-track {
-  background: #0a0a0a;
-  border-radius: 10px;
-}
-
-.NotesFullPage::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #a21616, #330000);
-  border-radius: 10px;
-  box-shadow: 0 0 8px #ff0000aa;
-}
-
-.NotesFullPage::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, #ff3333, #550000);
-}
-
-/* For Firefox */
+/* Note App Section */
+/* Notes Full Page */
 .NotesFullPage {
-  scrollbar-width: thin;
-  scrollbar-color: #962222 #0a0a0a;
+  position: absolute;      /* overlay full viewport */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;       /* full viewport height */
+  z-index: 999;        /* above footer/other content */
+  padding: 24px 32px;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
-.AllNotes{
+
+/* When any panel is open (toggle this class in JS), hide footer */
+body.panel-open .footer {
+  display: none !important;
+}
+
+/* Notes content area — give bottom padding so Add button doesn't cover last note */
+.AllNotes {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
-  margin-top: 30px;
+  gap: 20px;
+  justify-content: flex-start;
+  margin-top: 20px;
+  padding-bottom: 140px; /* safe space for fixed Add button */
 }
-.note{
-  width: 400px;
-  height: 400px;
+
+/* Individual note (example styling) */
+.note {
+  width: 380px;
+  height: 380px;
   background-color: var(--primary);
-  margin: 15px;
-  margin-top: 50px;
+  margin: 8px;
   display: flex;
   flex-direction: column;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
 }
-.note textarea{
+
+.note button{
+background-color: red;
+padding: 10px;
+margin-left: 5px;
+font-size: 12px;
+border: none;
+border-radius: 5px;
+}
+
+/* Make textarea fill note */
+.note textarea {
   width: 100%;
   height: 100%;
   resize: none;
   color: var(--text-light);
-  font-size: 25px;
-  outline: none;
-  padding: 10px;
+  font-size: 20px;
+  padding: 16px;
   border: none;
-  background-color: transparent;
+  background: transparent;
+  outline: none;
 }
-.AddNote{
-  position: absolute;
-  right: 5%;
-  font-size: 30px;
+
+/* Fix AddNote button to bottom-right */
+.AddNote {
+  z-index: 1000;
+  font-size: 18px;
   color: var(--text-light);
-  background-color: rgba(188, 12, 12, 0.724);
-  padding: 5px 10px;
+  background-color: rgba(188, 12, 12, 0.92);
+  padding: 10px 14px;
   border: none;
-  outline: none;
-  font-weight: 200;
-  font-family: Inter;
+  border-radius: 10px;
   cursor: pointer;
-  border-radius: 5px;
-
-}
-.AddNote:active{
-  box-shadow: 2px 1px 3px #000;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
 }
 
-.tool{
-    width: 100%;
-    background-color: var(--secondary);
-    color: var(--text-light);
-    padding: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 12px;
+/* small responsive tweaks */
+@media (max-width: 1024px) {
+  .note { width: 300px; height: 300px; }
+  .AddNote { right: 20px; bottom: 20px; font-size: 16px; padding: 8px 12px; }
+  .AllNotes { padding-bottom: 120px; }
 }
-.tool button{
-  padding: 5px 10px;
-  color: var(--text-light);
-  border: none;
-  outline: none;
-  border-radius: 4px;
-  cursor: pointer;
-
-}
-.tool button:active{
-  box-shadow: 1px 1px 2px #000;
-}
-.tool .save{
-  background-color: rgba(32, 32, 89, 0.822);
-}
-.tool .deleted{
-  background-color: rgba(171, 23, 23, 0.818);
+@media (max-width: 600px) {
+  .note { width: calc(100% - 40px); height: 220px; margin: 10px auto; }
+  .AllNotes { justify-content: center; padding-bottom: 110px; }
+  .AddNote { right: 16px; bottom: 16px; }
 }
 
-/* productivity Tracker Styling 6666666666666666666666666666666666666666666666666666666666 */
+
+/* productivity Tracker Styling */
 .containerProductivity {
   width: 90%;
   max-width: 1200px;
@@ -988,7 +1119,7 @@ body.panel-open .allElements {
   background-color: var(--secondary);
   padding: 30px;
   border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
 }
 
 .pTrackerContainer h1 {
@@ -1044,9 +1175,35 @@ body.panel-open .allElements {
   height: 400px;
 }
 
-/* Responsive Styles */
+/* FIX: Updated footer styling to ensure it stays at the bottom */
+.footer {
+  width: 100%;
+  padding: 20px 40px;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px 15px 0 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  z-index: 10;
+  margin-top: auto;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0; /* Prevents footer from shrinking */
+}
 
-/* Large Tablets / small screens */
+.footer-content p {
+  margin: 5px 0;
+  font-size: 16px;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* FIX: Added ProductivityTracker full height */
+.ProductivityTracker {
+  height: 100vh; /* Changed from 100% to 100vh */
+}
+
+/* Responsive Styles for Productivity Tracker */
 @media (max-width: 1024px) {
   .containerProductivity h1:first-child {
     font-size: 40px;
@@ -1066,7 +1223,6 @@ body.panel-open .allElements {
   }
 }
 
-/* Medium Tablets / mobile landscape */
 @media (max-width: 768px) {
   .containerProductivity h1:first-child {
     font-size: 35px;
@@ -1086,7 +1242,6 @@ body.panel-open .allElements {
   }
 }
 
-/* Mobile Devices */
 @media (max-width: 480px) {
   .containerProductivity h1:first-child {
     font-size: 28px;
@@ -1112,35 +1267,45 @@ body.panel-open .allElements {
   }
 }
 
-
-
-/* footer styling */
-
-
-.footer {
-  width: 100%;
-  padding: 20px 40px;
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(10px);
-  color: #ffffff;
-  text-align: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 15px 15px 0 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  margin-top: auto;
-}
-
-.footer-content p {
-  margin: 5px 0;
-  font-size: 16px;
-  text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+/* Additional responsive improvements */
+@media (max-width: 1200px) {
+  .fullElem {
+    padding: 30px;
+  }
 }
 
 @media (max-width: 768px) {
+  .fullElem {
+    padding: 20px;
+  }
+  .fullElem .back {
+    top: 15px;
+    right: 10px;
+    font-size: 16px;
+    padding: 8px 15px;
+  }
   .footer {
     padding: 15px 20px;
   }
   .footer-content p {
     font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .fullElem {
+    padding: 15px;
+  }
+  .fullElem .back {
+    top: 10px;
+    right: 10px;
+    font-size: 14px;
+    padding: 6px 12px;
+  }
+  .footer {
+    padding: 10px 15px;
+  }
+  .footer-content p {
+    font-size: 12px;
   }
 }
